@@ -1,34 +1,45 @@
 const express = require("express");
 const app = express();
 
-// TODO: Follow instructions in the checkpoint to implement ths API.
+const users = require("./data/users-data");
+const states = require("./data/states-data");
 
-const pastes = require("./data/pastes-data");
+app.use("/users/:userId", (req, res, next) => {
+  const { userId } = req.params;
+  const foundUser = users.find((user) => user.id === Number(userId));
 
-app.use("/pastes", (req, res) => {
-  res.json({ data: pastes });
+  if (foundUser) {
+    res.json({ data: foundUser });
+  } else {
+    next(`User id not found: ${userId}`);
+  }
 });
 
-// Not found handler
+app.use("/users", (req, res) => {
+  res.json({ data: users });
+});
+
+app.use("/states/:stateCode", (req, res, next) => {
+  const { stateCode } = req.params;
+  const stateName = statesData[stateCode];
+
+  if (stateName) {
+    res.json({ data: { stateCode, name: stateName } });
+  } else {
+    next(`State code not found: ${stateCode}`);
+  }
+});
+
+app.use("/states", (req, res) => {
+  res.json({ data: states });
+});
+
 app.use((request, response, next) => {
   next(`Not found: ${request.originalUrl}`);
 });
 
-app.use("/pastes/:pasteId", (req, res, next) => {
-  const { pasteId } = req.params;
-  const foundPaste = pastes.find((paste) => paste.id === Number(pasteId));
-
-  if (foundPaste) {
-    res.json({ data: foundPaste });
-  } else {
-    next(`Paste id not found: ${pasteId}`);
-  }
-});
-
-// Error handler
 app.use((error, request, response, next) => {
   console.error(error);
   response.send(error);
 });
-
 module.exports = app;
